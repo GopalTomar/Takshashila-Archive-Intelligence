@@ -1,0 +1,65 @@
+# ============================================================
+# Archive source configuration
+# ------------------------------------------------------------
+# The crawler ONLY uses `seed_urls`. `candidate_seed_urls` are NOT crawled
+# automatically — they are notes for a human operator who must VERIFY each URL
+# is (a) live, (b) publicly accessible, and (c) permitted, and then move it
+# into `seed_urls` deliberately.
+#
+# This project must never fabricate URLs, documents, or crawl results.
+# Additional archives can be added by appending new entries here — no code
+# change required.
+# ============================================================
+
+sources:
+  - id: arpi
+    name: "Claude Arpi — Historical / Digital Archive"
+    enabled: true
+    base_url: ""            # Operator must set a VERIFIED public base URL.
+    seed_urls: []           # Empty on purpose. Add only verified public URLs.
+    candidate_seed_urls:
+      # Unverified candidates. Do NOT crawl until a human confirms each one is
+      # live, public and permitted, then move it into seed_urls above.
+      # (Left intentionally empty — no URL is asserted here as fact.)
+      []
+    allowed_domains: []     # Crawler is restricted to these domains (SSRF/scope guard).
+    file_extensions: [".pdf"]
+    crawl_rules:
+      max_pages: 500
+      max_depth: 3
+      requests_per_second: 0.5   # polite rate limit
+      respect_robots: true
+      follow_external: false
+      wayback_fallback: true     # try Wayback only if a source URL is dead
+    rights:
+      default_rights_status: "unknown"
+      default_access_status: "public-web"
+      copyright_notes: >
+        Publicly accessible does not imply redistributable. Records may be
+        stored metadata-only where redistribution is inappropriate.
+    notes: >
+      Initial intended corpus. Seed URLs are deliberately empty until a human
+      operator verifies specific public URLs. See docs/INGESTION.md.
+
+  # Local fixture source used by the automated tests and the DEMO acceptance
+  # run. It points at a fixture HTTP server started by the test harness, never
+  # the public internet.
+  - id: fixtures
+    name: "Local test fixtures (synthetic — NOT archival material)"
+    enabled: false
+    base_url: "http://127.0.0.1:8899"
+    seed_urls: ["http://127.0.0.1:8899/index.html"]
+    allowed_domains: ["127.0.0.1"]
+    file_extensions: [".pdf"]
+    crawl_rules:
+      max_pages: 50
+      max_depth: 2
+      requests_per_second: 50
+      respect_robots: true
+      follow_external: false
+      wayback_fallback: false
+    rights:
+      default_rights_status: "synthetic-test-data"
+      default_access_status: "public-web"
+      copyright_notes: "Synthetic fixtures only."
+    notes: "Synthetic documents for tests. Never mixed with production records."

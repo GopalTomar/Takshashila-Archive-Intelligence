@@ -1,0 +1,57 @@
+# ─── Secrets ───────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ─── Archive data (NEVER commit) ───────────────────────────
+/data/raw/
+/data/processed/
+/data/ocr/
+/data/indexes/
+/data/exports/
+/data/store/
+/data/cache/
+*.pdf
+*.tif
+*.tiff
+# keep directory structure + docs + tiny fixtures
+!/data/README.md
+!/tests/**/*.pdf
+!/apps/api/app/seed/**/*.pdf
+
+# ─── Reports (generated) ───────────────────────────────────
+/reports/*.json
+/reports/*.md
+!/reports/.gitkeep
+
+# ─── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# ─── Node / Next.js ────────────────────────────────────────
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── Editors / OS ──────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp

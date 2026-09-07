@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Roboto+Mono:wght@400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --wine: #620d3c;
+  --gold: #f1a222;
+  --ink: #171413;
+  --ink-20: rgba(23, 20, 19, 0.16);
+  --deep: #F7F5F2;
+}
+
+html, body { padding: 0; margin: 0; }
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper, #fff);
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+h1, h2, h3, h4 { font-weight: 400; margin: 0; text-wrap: balance; }
+p { text-wrap: pretty; }
+a { color: inherit; text-decoration: none; }
+
+.tabnums { font-variant-numeric: tabular-nums; }
+
+/* Editorial component layer */
+@layer components {
+  .eyebrow {
+    @apply font-mono text-[11px] tracking-[0.14em] text-ink-50 uppercase;
+  }
+  .rule { border-bottom: 1px solid var(--ink-20); }
+  .card {
+    @apply border border-ink-20 bg-paper p-7 transition-colors;
+  }
+  .card:hover { background: var(--deep); }
+  .btn {
+    @apply font-mono text-[12px] tracking-[0.1em] uppercase px-6 py-3 bg-wine text-white cursor-pointer transition-colors;
+  }
+  .btn:hover { background: #4a0a2e; }
+  .btn-accent {
+    @apply font-mono text-[12px] tracking-[0.1em] uppercase px-6 py-3 bg-gold text-ink font-semibold cursor-pointer;
+  }
+  .btn-ghost {
+    @apply font-mono text-[12px] tracking-[0.1em] uppercase px-6 py-3 border border-ink-20 bg-transparent text-ink cursor-pointer transition-colors;
+  }
+  .btn-ghost:hover { background: var(--deep); }
+  .btn:disabled, .btn-accent:disabled, .btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+  .chip {
+    @apply font-mono text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 border border-ink-20 inline-flex items-center gap-1;
+  }
+  .meta { @apply font-mono text-[11px] tracking-[0.06em] text-ink-50; }
+  .kpi { @apply text-[44px] leading-none font-normal tabnums; }
+  .field {
+    @apply w-full border border-ink-20 bg-paper px-3 py-2 text-[14px] outline-none;
+  }
+  .field:focus { outline: 2px solid var(--wine); outline-offset: 1px; }
+  .navlink {
+    @apply block px-3 py-2 text-[14px] text-white/90 transition-colors;
+  }
+  .navlink:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .navlink[data-active="true"] { color: #fff; background: rgba(255,255,255,0.14); }
+  .cite {
+    @apply font-mono text-[11px] px-1.5 py-0.5 bg-gold-soft text-wine border border-ink-20 cursor-pointer;
+  }
+}
+
+/* Focus visibility */
+:focus-visible { outline: 2px solid var(--wine); outline-offset: 2px; }
+
+.prose-answer { line-height: 1.7; font-size: 15px; }
+.prose-answer p { margin: 0 0 0.9em 0; }

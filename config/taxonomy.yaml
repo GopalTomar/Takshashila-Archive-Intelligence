@@ -1,0 +1,52 @@
+# ============================================================
+# Extensible taxonomy.
+# These are CATEGORIES available for tagging — NOT claims about any document.
+# A document receives a topic tag only when there is actual evidence
+# (keyword/entity match or a human/AI-with-review decision).
+# ============================================================
+
+topics:
+  - { id: india-china-relations, label: "India–China Relations", keywords: ["india", "china", "sino-indian", "peking", "beijing"] }
+  - { id: india-tibet-relations, label: "India–Tibet Relations", keywords: ["tibet", "lhasa", "india-tibet"] }
+  - { id: tibet, label: "Tibet", keywords: ["tibet", "tibetan", "lhasa", "kham", "amdo"] }
+  - { id: dalai-lama, label: "Dalai Lama", keywords: ["dalai lama"] }
+  - { id: china, label: "China", keywords: ["china", "chinese", "prc", "peking", "beijing"] }
+  - { id: border, label: "Border", keywords: ["border", "boundary", "frontier", "line of actual control", "loac"] }
+  - { id: mcmahon-line, label: "McMahon Line", keywords: ["mcmahon line", "mcmahon"] }
+  - { id: aksai-chin, label: "Aksai Chin", keywords: ["aksai chin"] }
+  - { id: ladakh, label: "Ladakh", keywords: ["ladakh"] }
+  - { id: nefa, label: "NEFA", keywords: ["nefa", "north east frontier agency"] }
+  - { id: arunachal-pradesh, label: "Arunachal Pradesh", keywords: ["arunachal"] }
+  - { id: sikkim, label: "Sikkim", keywords: ["sikkim"] }
+  - { id: bhutan, label: "Bhutan", keywords: ["bhutan"] }
+  - { id: nepal, label: "Nepal", keywords: ["nepal"] }
+  - { id: uprising-1959, label: "1959 Tibetan Uprising", keywords: ["1959", "uprising", "lhasa revolt"] }
+  - { id: war-1962, label: "1962 India-China War", keywords: ["1962", "war"] }
+  - { id: diplomacy, label: "Diplomacy", keywords: ["diplomacy", "diplomatic", "note verbale", "memorandum", "talks"] }
+  - { id: military, label: "Military", keywords: ["army", "military", "troops", "brigade", "regiment"] }
+  - { id: maps, label: "Maps", keywords: ["map", "cartograph", "sketch map"] }
+  - { id: white-papers, label: "White Papers", keywords: ["white paper"] }
+  - { id: foreign-policy, label: "Foreign Policy", keywords: ["foreign policy", "external affairs", "mea"] }
+  - { id: historical-documents, label: "Historical Documents", keywords: [] }
+
+# Entity types recognised by the entity extractor. Confidence + provenance are
+# stored per mention. Entities are NOT created merely because a model guesses.
+entity_types:
+  - PERSON
+  - ORGANIZATION
+  - LOCATION
+  - COUNTRY
+  - EVENT
+  - DOCUMENT
+  - DATE
+  - MILITARY_UNIT
+  - INSTITUTION
+
+# Gazetteer for deterministic (non-AI) entity matching. Only these known,
+# unambiguous names are matched deterministically; anything else requires
+# AI extraction which is stored as unverified and needs human review.
+gazetteer:
+  COUNTRY: ["India", "China", "Tibet", "Nepal", "Bhutan", "Pakistan"]
+  LOCATION: ["Aksai Chin", "Ladakh", "NEFA", "Arunachal Pradesh", "Sikkim", "Lhasa", "McMahon Line"]
+  PERSON: ["Dalai Lama", "Jawaharlal Nehru", "Zhou Enlai", "Claude Arpi"]
+  ORGANIZATION: ["Ministry of External Affairs", "People's Liberation Army"]
