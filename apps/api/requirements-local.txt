@@ -1,0 +1,41 @@
+# ============================================================
+# No-Docker LOCAL run (SQLite + in-process jobs).
+# Lean dependency set — everything here has prebuilt Windows/macOS/Linux wheels
+# and needs NO system services (no PostgreSQL, no Redis) and NO compiler.
+#
+# Excluded vs the full stack (not imported on the SQLite + inline path):
+#   psycopg / pgvector  -> only for PostgreSQL
+#   celery / redis      -> only for the Celery job backend (we use in-process)
+#   alembic             -> migrations; SQLite tables are auto-created on startup
+#   ocrmypdf / pdfplumber -> not imported by the app
+#
+# OCR: pytesseract is included; it only needs the Tesseract binary at OCR TIME.
+# Without Tesseract installed, OCR is reported as "not performed" (never faked);
+# demo data has embedded text so it needs no OCR.
+# ============================================================
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-multipart==0.0.20
+
+SQLAlchemy==2.0.36
+
+httpx==0.28.1
+beautifulsoup4==4.12.3
+lxml==5.3.0
+
+pymupdf==1.25.1
+pytesseract==0.3.13
+Pillow==11.0.0
+
+PyYAML==6.0.2
+python-dateutil==2.9.0.post0
+structlog==24.4.0
+tenacity==9.0.0
+numpy==2.2.1
+cryptography==44.0.0
+
+pytest==8.3.4
+pytest-asyncio==0.25.0

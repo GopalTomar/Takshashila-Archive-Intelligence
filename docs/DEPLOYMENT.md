@@ -1,5 +1,26 @@
 # Deployment
 
+## Simplest: no Docker, no PostgreSQL, no Redis (SQLite)
+
+For a fast local run or a submission demo, use the SQLite + in-process path.
+Only Python 3.11+ and Node.js 20+ are required.
+
+```powershell
+# Windows (PowerShell), from the repo root
+.\scripts\run_local.ps1
+```
+```bash
+# macOS / Linux
+./scripts/run_local.sh
+```
+
+This installs the lean deps (`apps/api/requirements-local.txt`), writes a `.env`
+with a generated `APP_SECRET_KEY`, auto-creates the SQLite schema on startup,
+and launches the API (`:8000`) and web UI (`:3000`). Semantic search is off
+(no embedder) and keyword search is used — reported honestly. Set `GROQ_API_KEY`
+in `.env` to enable grounded AI answers. Verified: 44/44 tests pass, full
+vertical slice runs on SQLite alone.
+
 ## Docker Compose (recommended)
 
 ```bash

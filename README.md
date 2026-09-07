@@ -63,6 +63,42 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - Docker + Docker Compose (recommended), **or** for local dev:
 - Python 3.11+, Node.js 20+, PostgreSQL 16 with `pgvector`, Tesseract + Ghostscript (for OCR)
 
+## Quick start — no Docker (recommended, simplest)
+
+Runs the whole app with **SQLite + in-process jobs** — **no Docker, no
+PostgreSQL, no Redis**. Only Python 3.11+ and Node.js 20+ are needed.
+
+**Windows (PowerShell), from the repo root:**
+
+```powershell
+.\scripts\run_local.ps1
+```
+
+**macOS / Linux:**
+
+```bash
+./scripts/run_local.sh
+```
+
+The script creates a Python venv, installs the lean dependency set
+(`apps/api/requirements-local.txt`), writes a `.env` with a freshly generated
+`APP_SECRET_KEY` (never printed), starts the API on
+<http://localhost:8000> and the web UI on <http://localhost:3000>. Database
+tables are created automatically on first start (no migrations needed for
+SQLite). Load synthetic demo data from **Settings → Processing → Seed Demo
+Data**, or:
+
+```powershell
+Invoke-RestMethod -Method Post http://localhost:8000/api/ingestion/demo/seed
+```
+
+In this mode semantic search is **off** (no embedding provider) and keyword/
+full-text search is used — this is reported honestly in the UI. To enable
+grounded AI answers, set `GROQ_API_KEY` in `.env` (see *Configuring Groq*).
+
+> This no-Docker path is verified: 44/44 tests pass and the full vertical slice
+> (ingest → search → RAG retrieval → citations) runs on SQLite alone.
+
 ## Quick start (Docker)
 
 ```bash
