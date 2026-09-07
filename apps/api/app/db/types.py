@@ -32,7 +32,13 @@ class Vector(TypeDecorator):
 
     def load_dialect_impl(self, dialect):
         if dialect.name == "postgresql" and _HAS_PGVECTOR:
-            return dialect.type_descriptor(PgVector(self.dimensions))
+            # Dimensionless pgvector column: accepts any embedding dimension so
+            # EMBEDDING_DIMENSIONS is honoured under migrations for ANY provider
+            # (not pinned to the model-declared default). All rows still share
+            # one dimension in practice (a single configured embedder), so the
+            # cosine-distance operator works. To add an IVFFlat/HNSW index for
+            # scale, pin the dimension in a follow-up migration first.
+            return dialect.type_descriptor(PgVector())
         return dialect.type_descriptor(JSON())
 
     def process_bind_param(self, value, dialect):

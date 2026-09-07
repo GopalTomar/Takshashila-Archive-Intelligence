@@ -37,4 +37,15 @@ net); production relies on migrations.
 | `vector` (pgvector) | embedding column + cosine distance search |
 | `pg_trgm` | fuzzy text matching support |
 
+## Embedding column dimension
+
+`document_chunks.embedding` is a **dimensionless** pgvector column (`vector`,
+no length modifier). This is deliberate: `EMBEDDING_DIMENSIONS` is configurable
+per deployment (a Groq/OpenAI/local embedder may emit 256, 1024, 1536, … dims),
+so the schema must not pin a single dimension. A dimensionless column accepts
+whatever the configured embedder emits, and the cosine-distance operator works
+because every row shares one dimension (a single configured embedder). To add
+an ANN index (IVFFlat/HNSW) for a large corpus, first pin the column to your
+embedder's dimension in a follow-up migration, then create the index.
+
 See [`DATA_MODEL.md`](DATA_MODEL.md) for the full table list.
