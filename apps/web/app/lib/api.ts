@@ -26,6 +26,7 @@ export const api = {
   health: () => req<any>("/health"),
   ready: () => req<any>("/ready"),
   stats: (includeDemo = false) => req<any>(`/api/stats?include_demo=${includeDemo}`),
+  distributions: (includeDemo = false) => req<any>(`/api/stats/distributions?include_demo=${includeDemo}`),
   system: () => req<any>("/api/settings/system"),
 
   documents: (params: Record<string, any> = {}) => {

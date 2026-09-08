@@ -52,8 +52,34 @@ def ready(db: Session = Depends(get_db)) -> dict:
     # OCR.
     checks["ocr"] = {"tesseract_available": tesseract_available(), "version": tesseract_version()}
 
-    # Jobs.
+    # Jobs backend.
     s = get_settings()
-    checks["jobs"] = {"backend": "celery" if s.use_celery else "in-process"}
+    backend = "celery" if s.use_celery else "in-process"
+    checks["jobs"] = {"backend": backend}
+
+    # Redis (only meaningful when configured).
+    if s.redis_url:
+        try:
+            import redis  # lazy; only present in the full stack
+            client = redis.from_url(s.redis_url, socket_connect_timeout=2, socket_timeout=2)
+            pong = client.ping()
+            checks["redis"] = {"configured": True, "connected": bool(pong)}
+        except Exception as exc:
+            checks["redis"] = {"configured": True, "connected": False, "error": str(exc)[:200]}
+    else:
+        checks["redis"] = {"configured": False, "connected": False,
+                           "note": "REDIS_URL not set; in-process jobs in use"}
+
+    # Celery worker (best-effort ping; only when using celery).
+    if s.use_celery:
+        try:
+            from app.jobs.celery_app import celery_app
+            replies = celery_app.control.ping(timeout=2)
+            n = len(replies) if replies else 0
+            checks["worker"] = {"running": n > 0, "workers": n}
+        except Exception as exc:
+            checks["worker"] = {"running": False, "error": str(exc)[:200]}
+    else:
+        checks["worker"] = {"running": None, "note": "in-process runner (no separate worker)"}
 
     return {"ready": ok, "checks": checks}

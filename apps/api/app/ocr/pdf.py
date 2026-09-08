@@ -81,49 +81,44 @@ def _needs_ocr(result: ExtractionResult) -> bool:
     return (result.total_chars / max(result.page_count, 1)) < MIN_CHARS_PER_PAGE
 
 
-def _ocr_pages(path: str, dpi: int = 200) -> ExtractionResult:
-    import fitz
-    import pytesseract
-    from PIL import Image
+def _page_needs_ocr(text: str) -> bool:
+    return len((text or "").strip()) < MIN_CHARS_PER_PAGE
+
+
+def _ocr_render_page(doc, index: int, dpi: int = 200):
+    """OCR a single already-open PDF page; returns (text, confidence)."""
     import io
 
-    engine_version = tesseract_version()
-    doc = fitz.open(path)
-    pages: list[PageText] = []
-    confs: list[float] = []
-    for i in range(doc.page_count):
-        page = doc.load_page(i)
-        pix = page.get_pixmap(dpi=dpi)
-        img = Image.open(io.BytesIO(pix.tobytes("png")))
-        text = pytesseract.image_to_string(img)
-        # Per-word confidence via TSV output.
-        conf = None
-        try:
-            data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
-            vals = [int(c) for c in data.get("conf", []) if str(c).lstrip("-").isdigit() and int(c) >= 0]
-            if vals:
-                conf = sum(vals) / len(vals)
-                confs.append(conf)
-        except Exception:
-            pass
-        pages.append(PageText(page_number=i + 1, text=text, source="ocr", confidence=conf))
-    doc.close()
-    return ExtractionResult(
-        page_count=len(pages),
-        pages=pages,
-        used_ocr=True,
-        engine="tesseract",
-        engine_version=engine_version,
-        mean_confidence=(sum(confs) / len(confs)) if confs else None,
-    )
+    import pytesseract
+    from PIL import Image
+
+    page = doc.load_page(index)
+    pix = page.get_pixmap(dpi=dpi)
+    img = Image.open(io.BytesIO(pix.tobytes("png")))
+    text = pytesseract.image_to_string(img)
+    conf = None
+    try:
+        data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+        vals = [int(c) for c in data.get("conf", []) if str(c).lstrip("-").isdigit() and int(c) >= 0]
+        if vals:
+            conf = sum(vals) / len(vals)
+    except Exception:
+        pass
+    return text, conf
 
 
 def extract_text(path: str, *, force_ocr: bool = False) -> ExtractionResult:
-    """Extract per-page text, running OCR only when needed (or forced).
+    """Extract per-page text, running OCR PER PAGE only where needed (or forced).
 
-    Never raises for a bad PDF — returns a result with ``error`` set so the
-    pipeline can record an explicit failure without losing the document.
+    Native-text pages are preserved - OCR never silently replaces them. Only
+    pages with little/no embedded text are OCR'd, so a mixed PDF (a few scanned
+    pages among native pages) is handled correctly, and each page records its
+    source (``embedded`` vs ``ocr``). Never raises for a bad PDF - returns a
+    result with ``error`` set so the pipeline can record an explicit failure
+    without losing the document.
     """
+    import fitz
+
     try:
         embedded = _extract_embedded(path)
     except Exception as exc:  # corrupt/empty/non-PDF
@@ -133,25 +128,45 @@ def extract_text(path: str, *, force_ocr: bool = False) -> ExtractionResult:
         embedded.error = "PDF has zero pages"
         return embedded
 
-    if not force_ocr and not _needs_ocr(embedded):
-        return embedded
+    if force_ocr:
+        need = [p.page_number for p in embedded.pages]
+    else:
+        need = [p.page_number for p in embedded.pages if _page_needs_ocr(p.text)]
 
-    # Needs OCR.
+    if not need:
+        return embedded  # every page already has native text
+
     if not tesseract_available():
         embedded.error = (
-            "OCR required (little/no embedded text) but Tesseract is not "
-            "installed. Embedded text preserved; OCR NOT performed."
+            f"OCR required for {len(need)} page(s) with little/no embedded text, "
+            "but Tesseract is not installed. Embedded text preserved; OCR NOT performed."
         )
         return embedded
 
     try:
-        ocr = _ocr_pages(path)
-        # If forced but embedded had text, keep both isn't needed; OCR wins only
-        # when embedded was insufficient. Preserve embedded text where richer.
-        if not force_ocr and embedded.total_chars > ocr.total_chars:
-            embedded.error = "OCR produced less text than embedded; kept embedded."
-            return embedded
-        return ocr
+        doc = fitz.open(path)
+        by_num = {p.page_number: p for p in embedded.pages}
+        confs: list[float] = []
+        ocr_done = 0
+        for num in need:
+            text, conf = _ocr_render_page(doc, num - 1)
+            existing = by_num[num]
+            # Never lose richer native text.
+            if not force_ocr and len((existing.text or "").strip()) >= len((text or "").strip()):
+                continue
+            existing.text = text
+            existing.source = "ocr"
+            existing.confidence = conf
+            if conf is not None:
+                confs.append(conf)
+            ocr_done += 1
+        doc.close()
+        embedded.used_ocr = ocr_done > 0
+        if ocr_done > 0:
+            embedded.engine = "tesseract"
+            embedded.engine_version = tesseract_version()
+            embedded.mean_confidence = (sum(confs) / len(confs)) if confs else None
+        return embedded
     except Exception as exc:
         embedded.error = f"OCR failed: {exc}"
         return embedded

@@ -26,6 +26,8 @@ secrets/
 /reports/*.json
 /reports/*.md
 !/reports/.gitkeep
+# Keep the committed full-stack verification report (generated crawl reports stay ignored)
+!/reports/full-stack-local-verification.md
 
 # ─── Python ────────────────────────────────────────────────
 __pycache__/
